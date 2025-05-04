@@ -273,16 +273,15 @@
             this.api()
                 .columns()
                 .every(function () {
-                    var column = this;
-                    var title = column.header().textContent;
-
-                    if (column.index() !== 6) { // Skip the Action column (index 6)
-                        $('<input style="width: 100%; padding: 0.5rem 0.75rem; background-color: white; margin-top: 5px; border: 1px #6B7884 solid; border-radius: 5px;" class="dt-search" type="text" placeholder="Search ' + title + '" />')
-                            .appendTo($(column.footer()))
-                            .on("keyup change clear", function () {
-                                column.search(this.value).draw();
-                            });
-                    }
+                    const column = this;
+        // Skip kolom terakhir (Action)
+        if (column.index() !== 6) {
+            $('input', column.header()).on("keyup change clear", function () {
+                if (column.search() !== this.value) {
+                    column.search(this.value).draw();
+                }
+            });
+        }
                 });
         },
         data: dataSet,
@@ -298,13 +297,10 @@
         },
     });
 
-    // Perbaikan pencarian kolom individual (per row)
-    $('#myTable thead').on('keyup change', 'input', function () {
-        const colIdx = $(this).parent().index();
-        table.column(colIdx).search(this.value).draw();
+    $("#dt-search-0").on("keyup change clear", function () {
+        table.search(this.value).draw();
     });
 
-    // Event untuk tombol aksi
     $('#myTable').on('click', '.btn-edit', function() {
         const rowId = $(this).data('id');
         alert('Edit button clicked for row with ID: ' + rowId);
