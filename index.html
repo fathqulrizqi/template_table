@@ -1,0 +1,326 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Per Column Search</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/2.3.0/css/dataTables.bootstrap5.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css"
+    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-x..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/2.3.0/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/2.3.0/js/dataTables.bootstrap5.js"></script>
+
+    <style>
+        .dt-length {
+          display: flex;
+          align-items: center;
+          margin-left: 5px;
+          gap: 0.5rem;
+          font-size: 0.875rem;
+          color: #374151; /* Tailwind text-gray-700 */
+        }
+      
+        .dt-length select {
+          padding: 5px 10px 5px 2.5rem;
+          font-size: 0.875rem;
+          color: #111827; /* Tailwind text-gray-900 */
+          border: 1px solid #d1d5db; /* Tailwind border-gray-300 */
+          border-radius: 0.5rem; /* Tailwind rounded-lg */
+          background-color: #f9fafb; /* Tailwind bg-gray-50 */
+          background-image: url("data:image/svg+xml,%3Csvg fill='gray' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.178l3.71-3.947a.75.75 0 111.08 1.04l-4.24 4.51a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: 0.75rem center;
+          background-size: 1rem 1rem;
+          appearance: none;
+        }
+      
+        /* Pastikan parent-nya flex-wrap */
+        div.dataTables_wrapper .dataTables_length,
+        div.dataTables_wrapper .dataTables_filter {
+          display: flex;
+          align-items: center;
+        }
+      
+        /* Parent container */
+        div.dataTables_wrapper .dataTables_length,
+        div.dataTables_wrapper .dataTables_filter {
+          margin-bottom: 0.5rem;
+        }
+      
+        /* Gunakan media query untuk responsive */
+        @media (max-width: 768px) {
+          div.dataTables_wrapper .dataTables_filter {
+            order: 2;
+            width: 100%;
+            margin-top: 0.5rem;
+            justify-content: flex-start;
+          }
+      
+          div.dataTables_wrapper .dataTables_length {
+            order: 1;
+            width: 100%;
+          }
+        }
+      
+        /* Sembunyikan label teks default */
+        .dt-search > label {
+          font-size: 0;
+          position: relative;
+          display: block;
+          margin-bottom: 5px;
+          margin-right: 5px;
+        }
+      
+        /* Styling input search agar mirip custom */
+        .dt-search input[type="search"] {
+          display: flex;
+          width: 100%;
+          padding: 0.5rem 0.75rem 0.5rem 2.5rem;
+          margin-right: 5px;
+          font-size: 0.875rem;
+          color: #111827;
+          border: 1px solid #d1d5db;
+          border-radius: 0.5rem;
+          background-color: #f9fafb;
+          background-image: url("data:image/svg+xml,%3Csvg fill='gray' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' d='M12.9 14.32a8 8 0 111.414-1.414l5.387 5.387a1 1 0 01-1.414 1.414l-5.387-5.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z' clip-rule='evenodd'%3E%3C/path%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: 0.75rem center;
+          background-size: 1rem 1rem;
+          outline: none;
+        }
+      
+        .dt-search input[type="search"]::placeholder {
+          color: #6b7280;
+          font-size: 0.875rem;
+        }
+      
+        /* Container flex */
+        .myTable-topbar {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 1rem;
+        }
+      
+        #myTable_length select {
+          padding: 4px 10px 4px 40px; /* atas-bawah 8px, kanan 12px, kiri 40px */
+          font-size: 14px;
+          color: #111827;
+          border: 1px solid #d1d5db;
+          border-radius: 8px;
+          background-color: #f9fafb;
+          background-image: url("data:image/svg+xml,%3Csvg fill='gray' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.178l3.71-3.947a.75.75 0 111.08 1.04l-4.24 4.51a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: 12px center;
+          background-size: 16px 16px;
+          outline: none;
+          appearance: none;
+        }
+      
+        .dataTables_length {
+          display: flex;
+        }
+      
+        /* Flex container untuk posisi sejajar */
+        .dataTables_wrapper .myTable-topbar {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+          flex-wrap: wrap;
+          gap: 1rem;
+          margin-bottom: 1rem;
+        }
+      
+        /* Optional: responsive wrap behavior */
+        @media (max-width: 640px) {
+          .myTable-topbar {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+        }
+      
+        /* Sembunyikan teks label default untuk Search */
+        #dt-search-0 label {
+          font-size: 0;
+          position: relative;
+          display: block;
+          margin-bottom: 5px;
+          margin-right: 5px;
+        }
+      
+        /* Styling input search seperti sebelumnya */
+        #dt-search-0 input[type="search"] {
+          display: block;
+          width: 100%;
+          padding: 0.5rem 0.75rem 0.5rem 2.5rem;
+          font-size: 0.875rem;
+          color: #111827;
+          border: 1px solid #d1d5db;
+          border-radius: 0.5rem;
+          background-color: #f9fafb;
+          background-image: url("data:image/svg+xml,%3Csvg fill='gray' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' d='M12.9 14.32a8 8 0 111.414-1.414l5.387 5.387a1 1 0 01-1.414 1.414l-5.387-5.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z' clip-rule='evenodd'%3E%3C/path%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: 0.75rem center;
+          background-size: 1rem 1rem;
+          outline: none;
+        }
+      
+        #dt-search-0 input[type="search"]::placeholder {
+          color: #6b7280;
+          font-size: 0.875rem;
+        }
+      
+        /* Mengatur table supaya lebih rapi */
+        table {
+          width: 100%;
+          table-layout: fixed; /* Tetap menggunakan lebar tetap untuk kolom */
+        }
+      
+        .dataTables_scrollBody {
+          max-height: 400px;
+          overflow-y: auto;
+        }
+      </style>
+      
+  
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-7xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+        <h2 class="text-2xl font-bold mb-4 text-gray-700">Working Order</h2>
+        <div class="overflow-x-auto">
+            <table id="myTable" class="hover min-w-full text-sm text-left text-gray-500">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                    <tr>
+                        <th>Name</th>
+                        <th>Position</th>
+                        <th>Office</th>
+                        <th>Extn.</th>
+                        <th>Start date</th>
+                        <th>Salary</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <thead>
+                    <tr>
+                        <th><input type="text" placeholder="Search Name" class="dt-search" /></th>
+                        <th><input type="text" placeholder="Search Position" class="dt-search" /></th>
+                        <th><input type="text" placeholder="Search Office" class="dt-search" /></th>
+                        <th><input type="text" placeholder="Search Extn." class="dt-search" /></th>
+                        <th><input type="text" placeholder="Search Start date" class="dt-search" /></th>
+                        <th><input type="text" placeholder="Search Salary" class="dt-search" /></th>
+                        <th></th> <!-- Action column does not need a search input -->
+                    </tr>
+                </thead>
+          
+          <tbody>
+            
+          </tbody>
+          
+        </table>
+      </div>
+    </div>
+    <script type="module">
+        // Mengimpor dataSet dari data.js
+        import { dataSet } from './data.js';
+      
+
+        $(document).ready(function () {
+    const table = $("#myTable").DataTable({
+        search: {
+            return: true,
+        },
+        columns: [
+            { title: "Name" },
+            { title: "Position" },
+            { title: "Office" },
+            { title: "Extn." },
+            { title: "Start date" },
+            { title: "Salary" },
+            {
+                title: "Action",
+                data: null,
+                searchable: false,
+                render: function (data, type, row) {
+                    return `
+                        <button class="btn btn-pdf" data-id="${row.id}"><i class="fa-solid fa-file-pdf" style="color: #2C3E50;"></i></button>
+                        <button class="btn btn-edit" data-id="${row.id}"><i class="fa-solid fa-edit" style="color: #3498DB;"></i></button>
+                        <button class="btn btn-delete" data-id="${row.id}"><i class="fa-solid fa-trash" style="color: #E74C3C;"></i></button>
+                    `;
+                }
+            }
+        ],
+        initComplete: function () {
+            // Menambahkan input pencarian untuk setiap kolom di baris kedua thead
+            this.api()
+                .columns()
+                .every(function () {
+                    var column = this;
+                    var title = column.header().textContent;
+
+                    if (column.index() !== 6) { // Skip the Action column (index 6)
+                        $('<input style="width: 100%; padding: 0.5rem 0.75rem; background-color: white; margin-top: 5px; border: 1px #6B7884 solid; border-radius: 5px;" class="dt-search" type="text" placeholder="Search ' + title + '" />')
+                            .appendTo($(column.footer()))
+                            .on("keyup change clear", function () {
+                                column.search(this.value).draw();
+                            });
+                    }
+                });
+        },
+        data: dataSet,
+        layout: {
+            topStart: "pageLength",
+            bottom: "paging",
+            bottomStart: null,
+            bottomEnd: null,
+        },
+        language: {
+            searchPlaceholder: "Search all tables...",
+            search: "",
+        },
+    });
+
+    // Perbaikan pencarian kolom individual (per row)
+    $('#myTable thead').on('keyup change', 'input', function () {
+        const colIdx = $(this).parent().index();
+        table.column(colIdx).search(this.value).draw();
+    });
+
+    // Event untuk tombol aksi
+    $('#myTable').on('click', '.btn-edit', function() {
+        const rowId = $(this).data('id');
+        alert('Edit button clicked for row with ID: ' + rowId);
+    });
+
+    $('#myTable').on('click', '.btn-delete', function() {
+        const rowId = $(this).data('id');
+        alert('Delete button clicked for row with ID: ' + rowId);
+    });
+
+    $('#myTable').on('click', '.btn-pdf', function() {
+        const rowId = $(this).data('id');
+        alert('PDF button clicked for row with ID: ' + rowId);
+    });
+});
+
+    </script>
+  </body>
+</html>
