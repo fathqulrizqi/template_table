@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -227,6 +226,13 @@
                         <th><input type="text" placeholder="Search Extn." class="dt-search" /></th>
                         <th><input type="text" placeholder="Search Start date" class="dt-search" /></th>
                         <th><input type="text" placeholder="Search Salary" class="dt-search" /></th>
+                        <th>
+                          <select class="dt-select form-select form-select-sm">
+                            <option value="">All Status</option>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                          </select>
+                        </th>
                         <th></th> <!-- Action column does not need a search input -->
                     </tr>
                 </thead>
@@ -255,6 +261,7 @@
             { title: "Extn." },
             { title: "Start date" },
             { title: "Salary" },
+            { title: "Status" },
             {
                 title: "Action",
                 data: null,
@@ -274,6 +281,24 @@
                 .columns()
                 .every(function () {
                     const column = this;
+                    const select = $('<select><option value=""></option></select>')
+                    .appendTo($(column.footer()).empty())
+                    .on('change', function () {
+                        column
+                            .search($(this).val(), {exact: true})
+                            .draw();
+                    });
+
+                    column
+                    .data()
+                    .unique()
+                    .sort()
+                    .each(function (d, j) {
+                        select.append(
+                            '<option value="' + d + '">' + d + '</option>'
+                        );
+                    });
+ 
         // Skip kolom terakhir (Action)
         if (column.index() !== 6) {
             $('input', column.header()).on("keyup change clear", function () {
