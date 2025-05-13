@@ -323,10 +323,12 @@ document.addEventListener("click", function (e) {
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-  new AirDatepicker("#startDate", {
-    dateFormat: 'dd-MM-yyyy',
-    minDate: new Date(),
-    locale: {
+  // Function to initialize the Air Datepicker
+  function datepicker(selector) {
+    new AirDatepicker(selector, {
+      dateFormat: 'dd-MM-yyyy',
+      minDate: new Date(),
+      locale: {
         days: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
         daysShort: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
         daysMin: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
@@ -335,9 +337,15 @@ document.addEventListener('DOMContentLoaded', function () {
         today: "Today",
         clear: "Clear",
         firstDay: 0
-    },
+      },
+    });
+  }
+
+  // Initialize datepickers for both startDate and endDate
+  datepicker("#startDate");
+  datepicker("#endDate");
 });
-  });
+
 
     </script>
   </body>
