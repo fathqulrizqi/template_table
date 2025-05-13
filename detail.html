@@ -5,6 +5,9 @@
     <title>TinyMCE with Letterhead</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/node_modules/tinymce/tinymce.min.js"></script>
+    <script src="/node_modules/air-datepicker/air-datepicker.js"></script>
+    <script src="/node_modules/air-datepicker/locale/en.js"></script>
+    <link rel="stylesheet" href="/node_modules/air-datepicker/air-datepicker.css">
   </head>
   <body class="bg-gray-100 p-6">
     
@@ -14,12 +17,17 @@
       <h2 class="font-bold text-xl">Detail Working Order</h2>
     </div>
 
-    <div class="flex justify-center">
+    <div class="flex justify-start">
         <button
           onclick="generateFullDoc()"
-          class="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          class="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mx-2"
         >
           Preview Full Document
+        </button>
+        <button
+          class="mb-4 px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700"
+        >
+          Save Changes
         </button>
       </div>
       
@@ -39,6 +47,7 @@
           <img src="https://placehold.co/80x50" alt="Logo 2" />
         </div>
         <hr class="mt-2 border-t border-black" />
+        <hr class="mt-[1px] border-t border-black" />
         <p class="text-lg font-bold text-center underline mt-4">
           WORKING ORDER CONFIRMATION
         </p>
@@ -59,7 +68,7 @@
                   type="text"
                   name="attn"
                   id="attn"
-                  class="border rounded w-full"
+                  class="border rounded w-full px-2"
                 />
               </td>
             </tr>
@@ -70,7 +79,7 @@
                   type="text"
                   name="ref"
                   id="ref"
-                  class="border rounded w-full"
+                  class="border rounded w-full px-2"
                 />
               </td>
             </tr>
@@ -81,7 +90,7 @@
                   type="text"
                   name="project"
                   id="project"
-                  class="border rounded w-full"
+                  class="border rounded w-full px-2"
                 />
               </td>
             </tr>
@@ -128,7 +137,7 @@
                   type="text"
                   name="total"
                   id="total"
-                  class="border rounded w-full"
+                  class="border rounded w-full px-2"
                 />
               </td>
             </tr>
@@ -139,7 +148,7 @@
                   type="text"
                   name="payment"
                   id="payment"
-                  class="border rounded w-full"
+                  class="border rounded w-full px-2"
                 />
               </td>
             </tr>
@@ -150,7 +159,7 @@
                   type="text"
                   name="startDate"
                   id="startDate"
-                  class="border rounded w-full"
+                  class="border rounded w-full px-2"
                 />
               </td>
             </tr>
@@ -161,7 +170,7 @@
                   type="text"
                   name="endDate"
                   id="endDate"
-                  class="border rounded w-full"
+                  class="border rounded w-full px-2"
                 />
               </td>
             </tr>
@@ -171,7 +180,7 @@
                 <select
                   name="budgetNo"
                   id="budgetNo"
-                  class="border rounded w-full"
+                  class="border rounded w-full px-2"
                 >
                   <option value="">Select Budget No</option>
                   <option value="1">Budget 1</option>
@@ -187,7 +196,7 @@
                   type="text"
                   name="remark"
                   id="remark"
-                  class="border rounded w-full"
+                  class="border rounded w-full px-2"
                 />
               </td>
             </tr>
@@ -245,7 +254,7 @@
         base_url: "/node_modules/tinymce",
         plugins: "table code lists",
         toolbar:
-          "undo redo | styles | bold italic | alignleft aligncenter alignright | bullist numlist | table | code",
+          "undo redo | styles | bold italic | table | alignleft aligncenter alignright | bullist numlist  | code",
         menubar: false,
       });
 
@@ -312,6 +321,23 @@ document.addEventListener("click", function (e) {
     closeModal();
   }
 });
+
+document.addEventListener('DOMContentLoaded', function () {
+  new AirDatepicker("#startDate", {
+    dateFormat: 'dd-MM-yyyy',
+    minDate: new Date(),
+    locale: {
+        days: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+        daysShort: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+        daysMin: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+        months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+        monthsShort: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        today: "Today",
+        clear: "Clear",
+        firstDay: 0
+    },
+});
+  });
 
     </script>
   </body>
