@@ -5,12 +5,17 @@
     <title>TinyMCE with Letterhead</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/node_modules/tinymce/tinymce.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="/node_modules/air-datepicker/air-datepicker.js"></script>
-    <script src="/node_modules/html2pdf.js/dist/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        window.jsPDF = window.jspdf.jsPDF;
+    </script>
 
     <link rel="stylesheet" href="/node_modules/air-datepicker/air-datepicker.css">
+</head>
 
-  </head>
   <body class="bg-gray-100 p-6">
     
     <!-- Header -->
@@ -31,12 +36,14 @@
         >
           Save Changes
         </button>
-          <button
-          id="buttonpdf"
-          class="mb-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-        >
-          View As PDF
-        </button>
+         <button
+  onclick="generatePDF()"
+  id="buttonpdf"
+  class="mb-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+>
+  View As PDF
+</button>
+
       </div>
       
 
@@ -259,17 +266,13 @@
       tinymce.init({
         selector: "#project-field",
         height: 300,
-        base_url: "/node_modules/tinymce",
         plugins: "table code lists",
         toolbar:
           "undo redo | styles | bold italic | table | alignleft aligncenter alignright | bullist numlist  | code",
         menubar: false,
       });
-
-      // Fungsi untuk generate konten HTML
-function generateFullDoc() {
-  const letterhead = document.getElementById("letterhead").outerHTML;
-  const approval = document.getElementById("approval").outerHTML;
+// Tambahkan ini sebelum fungsi generatePDF()
+function getDocumentData() {
   const projectContent = tinymce.get("project-field").getContent();
 
   const attn = document.getElementById("attn").value;
@@ -283,21 +286,45 @@ function generateFullDoc() {
   const budgetNo = document.getElementById("budgetNo").value;
   const remark = document.getElementById("remark").value;
   const vendor = document.getElementById("vendor")?.innerText ?? "##VENDOR##";
+  const number = document.getElementById("number")?.innerText ?? "##NUMBER##";
+
+  return { 
+    number,
+    vendor,
+    attn,
+    ref,
+    project,
+    projectContent,
+    date,
+    total,
+    payment,
+    startDate,
+    endDate,
+    budgetNo,
+    remark
+  };
+}
+
+
+function generateFullDoc() {
+  const data = getDocumentData();
+  const letterhead = document.getElementById("letterhead").outerHTML;
+  const approval = document.getElementById("approval").outerHTML;
 
   const letterbody = `
     <table class="table-auto w-full text-[10pt]">
       <tbody>
-        <tr><td class="w-[170px] align-top">To</td><td>: ${vendor}</td></tr>
-        <tr><td class="align-top">Attn</td><td>: ${attn}</td></tr>
-        <tr><td class="align-top">Ref Quotation No & Date</td><td>: ${ref}</td></tr>
-        <tr><td class="align-top">Project</td><td>: ${project}<br>${projectContent}</td></tr>
-        <tr><td class="align-top">Date</td><td>: ${date}</td></tr>
-        <tr><td class="align-top">Total</td><td>: ${total}</td></tr>
-        <tr><td class="align-top">Payment Term</td><td>: ${payment}</td></tr>
-        <tr><td class="align-top">Start Date</td><td>: ${startDate}</td></tr>
-        <tr><td class="align-top">End Date</td><td>: ${endDate}</td></tr>
-        <tr><td class="align-top">BUDGET NO</td><td>: ${budgetNo}</td></tr>
-        <tr><td class="align-top">Remark</td><td>: ${remark}</td></tr>
+        <tr><td class="w-[170px] align-top">To</td><td>: ${data.vendor}</td></tr>
+        <tr><td class="align-top">Attn</td><td>: ${data.attn}</td></tr>
+        <tr><td class="align-top">Ref Quotation No & Date</td><td>: ${data.ref}</td></tr>
+        <tr><td class="align-top">Project</td><td>: ${data.project}<br>${data.projectContent}</td></tr>
+        <tr><td class="align-top">Date</td><td>: ${data.date}</td></tr>
+        <tr><td class="align-top">Total</td><td>: ${data.total}</td></tr>
+        <tr><td class="align-top">Payment Term</td><td>: ${data.payment}</td></tr>
+        <tr><td class="align-top">Start Date</td><td>: ${data.startDate}</td></tr>
+        <tr><td class="align-top">End Date</td><td>: ${data.endDate}</td></tr>
+        <tr><td class="align-top">BUDGET NO</td><td>: ${data.budgetNo}</td></tr>
+        <tr><td class="align-top">Remark</td><td>: ${data.remark}</td></tr>
       </tbody>
     </table>
     <p class="text-[10pt] mt-2">Please attach working order confirmation together with Invoice.</p>
@@ -314,50 +341,55 @@ function generateFullDoc() {
   // Tampilkan ke modal
   document.getElementById("modalContent").innerHTML = fullDoc;
   document.getElementById("previewModal").classList.remove("hidden");
-
-  // Return fullDoc untuk digunakan fungsi lain
-  return { fullDoc, number: document.getElementById("number")?.innerText ?? "##NUMBER##" };
 }
 
-// Fungsi untuk generate PDF
+
+
 function generatePDF() {
-  // Ambil konten HTML dari generateFullDoc
-  const { fullDoc, number } = generateFullDoc();
+  // Generate preview dulu
+  generateFullDoc();
   
-  const element = document.createElement('div');
-  element.innerHTML = fullDoc;
+  // Ambil element dari modal preview
+  const element = document.getElementById("modalContent").firstElementChild;
+  
+  html2canvas(element, {
+    scale: 2,
+    useCORS: true,
+    logging: false
+  }).then(canvas => {
+    const imgData = canvas.toDataURL('image/jpeg', 1.0);
+    
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
 
-  const opt = {
-    margin: 0,
-    filename: `WO_${number.replace('##', '').replace('##', '')}.pdf`,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { 
-      scale: 2,
-      useCORS: true,
-      logging: false
-    },
-    jsPDF: { 
-      unit: 'mm', 
-      format: 'a4', 
-      orientation: 'portrait'
-    }
-  };
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    
+    const widthRatio = pageWidth / canvas.width;
+    const heightRatio = pageHeight / canvas.height;
+    const ratio = widthRatio > heightRatio ? heightRatio : widthRatio;
+    
+    const canvasWidth = canvas.width * ratio;
+    const canvasHeight = canvas.height * ratio;
+    
+    const marginX = (pageWidth - canvasWidth) / 2;
+    const marginY = 0;
 
-  html2pdf().set(opt).from(element).toPdf().get('pdf').then((pdf) => {
-    if (pdf.internal.pages.length > 1) {
-      pdf.deletePage(2);
-    }
-    return pdf.output('blob');
-  }).then((pdfBlob) => {
+    pdf.addImage(imgData, 'JPEG', marginX, marginY, canvasWidth, canvasHeight);
+
+    // Buka PDF di tab baru
+    const pdfBlob = pdf.output('blob');
     const blobUrl = URL.createObjectURL(pdfBlob);
     window.open(blobUrl, '_blank');
+    
+    // Tutup modal preview
+    document.getElementById("previewModal").classList.add("hidden");
   });
-
-  // Tutup modal preview jika masih terbuka
-  document.getElementById("previewModal").classList.add("hidden");
 }
 
-document.getElementById('buttonpdf').addEventListener('click', generatePDF);
 
 function closeModal() {
   document.getElementById("previewModal").classList.add("hidden");
